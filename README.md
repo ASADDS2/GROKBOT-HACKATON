@@ -1,6 +1,6 @@
 # GOTA
 
-Coordinación de agua para Buenaventura y Quibdó. Monorepo `client` (React + Vite, F1) y `server` (Express).
+Coordinación de agua para Buenaventura y Quibdó. Monorepo `client` (React + Vite) y `server` (Express).
 
 ## Requisitos
 
@@ -18,7 +18,18 @@ npm run db:seed
 npm run dev
 ```
 
-Backend en `http://localhost:3001`. El frontend Vite entra en la fase F1.
+Backend en `http://localhost:3001`. Frontend Vite en `http://localhost:5173`.
+
+## Frontend (`/client`)
+
+SPA React 18 + Vite + Tailwind. Rutas `/`, `/mapa`, `/operador`.
+
+```bash
+cp client/.env.example client/.env   # VITE_API_BASE_URL=http://localhost:3001
+npm run build                         # typecheck + Vite
+```
+
+`apiFetch` habla con Express. No hay Supabase: el mapa hace polling a `GET /api/sed`. Si una ruta responde **501** (p. ej. `POST /api/transcribir`, B5) la UI muestra aviso y no se cae; el replay 48 h corre offline. Tipos en `shared/types/api.ts`.
 
 ## API (backend B4)
 

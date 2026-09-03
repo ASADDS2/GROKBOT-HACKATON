@@ -1,0 +1,161 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Fraunces', 'Times New Roman', serif;
+  --font-sans: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #1c1612;
+  --color-paper: #f3ebe0;
+  --color-paper-2: #e8dccb;
+  --color-well: #0e3d42;
+  --color-well-ink: #e8f4f3;
+  --color-agua: #2a6f6a;
+  --color-tension: #c4a035;
+  --color-sed: #c45c26;
+  --color-crisis: #8b1e2d;
+  --color-line: #2a241c;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 10% -10%, rgba(14, 61, 66, 0.08), transparent 50%),
+    radial-gradient(circle at 1px 1px, rgba(28, 22, 18, 0.06) 1px, transparent 0);
+  background-size: auto, 7px 7px;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+.tex-paso-0 {
+  background-color: #2a6f6a;
+  background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.35) 1px, transparent 1.2px);
+  background-size: 6px 6px;
+}
+
+.tex-paso-1 {
+  background-color: #c4a035;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(28, 22, 18, 0.28) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+.tex-paso-2 {
+  background-color: #c45c26;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(28, 22, 18, 0.3) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.18) 0 2px, transparent 2px 7px);
+}
+
+.tex-paso-3 {
+  background-color: #8b1e2d;
+  background-image: radial-gradient(circle at 1.5px 1.5px, rgba(255, 230, 200, 0.55) 1.1px, transparent 1.3px);
+  background-size: 5px 5px;
+}
+
+.forma-circulo {
+  border-radius: 999px;
+}
+.forma-rombo {
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.forma-cuadrado {
+  border-radius: 2px;
+}
+.forma-triangulo {
+  width: 0;
+  height: 0;
+  background: none;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom-width: 14px;
+  border-bottom-style: solid;
+}
+
+.alerta-observacion {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px dashed #0e3d42;
+  background: repeating-radial-gradient(circle, #0e3d42 0 1px, transparent 1px 4px);
+}
+
+.alerta-media {
+  width: 16px;
+  height: 16px;
+  transform: rotate(45deg);
+  background: #c4a035;
+  box-shadow: inset 0 0 0 2px #1c1612;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(28, 22, 18, 0.35) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.alerta-urgente {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 18px solid #8b1e2d;
+  animation: pulso-urgente 1.1s ease-in-out infinite;
+  filter: drop-shadow(0 0 0 #8b1e2d);
+}
+
+@keyframes pulso-urgente {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.mapboxgl-popup-content {
+  font-family: var(--font-sans);
+  background: #f3ebe0 !important;
+  color: #1c1612;
+  border: 1px solid #1c1612;
+  border-radius: 2px !important;
+  box-shadow: 4px 4px 0 #0e3d42 !important;
+  padding: 8px 10px !important;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+}
+
+.print-only {
+  display: none;
+}
