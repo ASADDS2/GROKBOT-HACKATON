@@ -1,4 +1,4 @@
-import type { ReporteDTO } from "../../../shared/types/api.ts";
+import type { ReporteDTO } from "../../../../shared/types/api.ts";
 
 export interface ExtraccionReporte {
   barrio_texto: string | null;

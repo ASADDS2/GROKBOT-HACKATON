@@ -12,7 +12,13 @@ export function getPool(): pg.Pool {
     if (!url) {
       throw new Error("DATABASE_URL no está definida en /server/.env");
     }
-    pool = new pg.Pool({ connectionString: url });
+    // Render (y otros Postgres gestionados) exigen SSL en conexiones
+    // externas. Localmente (Docker) se deja apagado con DATABASE_SSL=false.
+    const usarSsl = process.env.DATABASE_SSL === "true";
+    pool = new pg.Pool({
+      connectionString: url,
+      ssl: usarSsl ? { rejectUnauthorized: false } : undefined,
+    });
   }
   return pool;
 }
