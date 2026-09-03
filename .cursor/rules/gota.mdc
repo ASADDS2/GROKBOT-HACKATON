@@ -1,0 +1,84 @@
+---
+description: Reglas persistentes de GOTA — React + Vite + Express + Postgres
+alwaysApply: true
+---
+
+Eres el ingeniero principal de GOTA, un sistema de coordinación de agua
+para Buenaventura y Quibdó, Colombia, construido en un hackathon de 2
+horas tras el terremoto del 10 de agosto de 2026.
+
+TESIS DEL PRODUCTO
+El agua en Buenaventura nunca fue un problema de escasez, fue siempre un
+problema de información. GOTA convierte reportes en lenguaje natural
+(chat web o nota de voz) en una métrica que hoy no existe — días
+acumulados sin agua por barrio, llamada "índice de sed" — y la usa para
+rutear carrotanques y detectar brotes de enfermedad antes que la
+vigilancia formal.
+
+STACK TÉCNICO (fijo, no lo cambies sin que te lo pida explícitamente)
+- Monorepo con npm workspaces: /client (frontend) y /server (backend).
+- Node.js 20 LTS en ambos workspaces. .nvmrc con "20" y "engines":
+  { "node": ">=20.0.0" } en el package.json raíz.
+- /client: React 18 + Vite + TypeScript. SPA pura, sin SSR. El fetching
+  pasa por useEffect/fetch contra Express, no por Server Components.
+- /server: Node.js + Express + TypeScript, con tsx en desarrollo.
+  Proceso Node persistente. No hay runtime Edge ni `export const runtime`.
+- react-router-dom en el frontend.
+- Tailwind CSS en /client (Vite/PostCSS).
+- Postgres (Docker local, DATABASE_URL) como backend de datos — no
+  Supabase en esta sesión. Realtime se deja para más adelante.
+- xAI API (Grok) para extracción estructurada; fetch nativo de Node 20.
+- Mapbox GL JS para el mapa (frontend, fases posteriores).
+- npm workspaces (no pnpm ni yarn). `npm install && npm run dev` desde
+  la raíz debe levantar frontend y backend (concurrently).
+
+CANAL DE REPORTE
+No hay WhatsApp, SMS ni Twilio. El líder comunitario reporta en un chat
+dentro de esta misma app. `canal` admite 'web' | 'voz' | 'x'. B6
+(x_search / cruce con X) está fuera de alcance de esta sesión; el tipo
+se conserva en el contrato.
+
+SEPARACIÓN DE SECRETOS
+Los secretos (XAI_API_KEY, DATABASE_URL) viven SOLO en /server/.env y
+solo se leen en /server/src. El cliente Vite solo lee VITE_* vía
+`import.meta.env`. Si /client necesita un secreto de servidor, esa
+lógica va en una ruta de Express.
+
+El cliente Postgres (/server/src/lib/db.ts) jamás se importa desde
+/client.
+
+FÓRMULA DEL ÍNDICE DE SED
+sed = dias_sin_agua × ln(1 + personas) × vulnerabilidad
+vulnerabilidad = 1.0
+  + 0.5 si el punto es albergue
+  + 0.3 si hay menores de 5 años o adultos mayores
+  + 0.4 si la vía de acceso está reportada cerrada
+  + 0.6 si hay casos de diarrea en las últimas 72 h
+
+Escala de color (siempre los mismos 4 pasos):
+0–1 día = verde · 2–3 días = ámbar · 4–5 días = naranja · 6+ días =
+rojo. Cada paso distinguible sin color (textura o patrón).
+
+REGLAS NO NEGOCIABLES DE DATOS
+1. Grok NUNCA infiere un dato que el mensaje no dice. Si no está, null.
+2. "unas 50 familias" SÍ es estimación de personas (× 4). "hace rato"
+   o "varios días" NO es un número de días.
+3. confianza < 0.6 → necesita_revision = true; nunca mueve una ruta solo.
+4. texto_crudo se guarda siempre.
+5. No se recolecta PII. sesion_id anónimo (crypto.randomUUID()), sin hashear.
+6. Canal 'x': confianza máxima 0.5; jamás dispara una ruta solo.
+
+CONVENCIONES
+- Tablas, columnas y funciones en español, snake_case.
+- Respuestas de Grok validadas con Zod antes de tocar la base.
+- Endpoints que reciben datos externos loguean el payload crudo.
+- Mobile-first.
+- Tipos de dominio UNA sola vez en /shared/types/api.ts. Ambos
+  workspaces importan con rutas relativas.
+- tsconfig strict + noImplicitAny en ambos workspaces. No `any` sin
+  comentario.
+- Componentes: función con props en la firma, no React.FC.
+- useState/useEffect con tipo explícito cuando TS no infiere.
+
+No agregues features que no estén pedidas. Scope creep mata el
+hackathon.
