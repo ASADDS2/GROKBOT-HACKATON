@@ -1,0 +1,8 @@
+{
+  "name": "client",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "echo \"[gota] Vite (F1) pendiente — backend en :3001\" && tail -f /dev/null"
+  }
+}
