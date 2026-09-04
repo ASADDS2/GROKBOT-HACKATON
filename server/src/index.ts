@@ -9,10 +9,20 @@ import { rutaRouter } from "./routes/ruta.ts";
 import { sedRouter } from "./routes/sed.ts";
 import { transcribirRouter } from "./routes/transcribir.ts";
 
+const ORIGEN_DEV = "http://localhost:5173";
+
+function origenesCors(): string[] {
+  const extras = (process.env.CORS_ORIGIN ?? "")
+    .split(",")
+    .map((origen) => origen.trim())
+    .filter((origen) => origen.length > 0);
+  return [...new Set([ORIGEN_DEV, ...extras])];
+}
+
 const app = express();
 const port = Number(process.env.PORT) || 3001;
 
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: origenesCors() }));
 app.use(express.json());
 
 app.get("/api/salud", (_req, res) => {
