@@ -1,0 +1,33 @@
+databases:
+  - name: gota-db
+    databaseName: gota
+    user: gota
+    plan: free
+    postgresMajorVersion: "17"
+
+services:
+  - type: web
+    name: gota-server
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: .
+    # Incluye devDependencies (tsx, typescript) porque el server se ejecuta
+    # con tsx; Render omite devDeps por defecto en producción.
+    buildCommand: npm install --include=dev
+    # Migración idempotente (CREATE TABLE IF NOT EXISTS) antes de arrancar.
+    startCommand: npm run migrate -w server && npm run start -w server
+    healthCheckPath: /api/salud
+    autoDeploy: true
+    branch: develop
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gota-db
+          property: connectionString
+      - key: DATABASE_SSL
+        value: "true"
+      - key: XAI_API_KEY
+        sync: false
