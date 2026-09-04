@@ -41,11 +41,11 @@ Abre `http://localhost:5173`. Mobile-first a **375px**.
 | `GET` | `/api/salud` | `{ ok, servicio }` |
 | `GET` | `/api/sed` | `SedFeatureCollection` |
 | `GET` | `/api/alertas` | `AlertaDTO[]` |
-| `GET` | `/api/ruta` | `RutaResponse` |
+| `GET` | `/api/ruta?carrotanque=&fecha=` | `RutaResponse` |
 | `GET` | `/api/reportes/revision` | `ReporteDTO[]` |
 | `POST` | `/api/reportes` | `ReporteInput` → `ReporteDTO` |
 | `PATCH` | `/api/reportes/:id` | `{ barrio_id?, necesita_revision? }` |
 | `POST` | `/api/transcribir` | multipart `audio` → `TranscripcionResponse` |
 | `POST` | `/api/entregas` | `EntregaInput` |
 
-B1–B2 aún pueden devolver **501**. La UI muestra «backend aún no implementa esta ruta», conserva el último `FeatureCollection` (o uno vacío) y el **replay 48 h / 30 s** sigue offline. Polling de sed cada 12 s.
+B4 ya sirve sed/reportes/ruta/alertas/entregas. `POST /api/transcribir` (B5) puede devolver **501**: la UI avisa «backend aún no implementa esta ruta» y no se cae. Replay 48 h / 30 s offline. Polling de sed cada 12 s.
