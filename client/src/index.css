@@ -129,7 +129,8 @@ h3,
   }
 }
 
-.mapboxgl-popup-content {
+.mapboxgl-popup-content,
+.maplibregl-popup-content {
   font-family: var(--font-sans);
   background: #f3ebe0 !important;
   color: #1c1612;

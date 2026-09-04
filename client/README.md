@@ -32,7 +32,7 @@ Abre `http://localhost:5173`. Mobile-first a **375px**.
 | Variable | Uso |
 | --- | --- |
 | `VITE_API_BASE_URL` | Express, default `http://localhost:3001` |
-| `VITE_MAPBOX_TOKEN` | Mapbox GL. Si falta, plano esquemático |
+| (mapa) | MapLibre + OpenFreeMap, sin token |
 
 ## Endpoints (contrato en `shared/types/api.ts`)
 

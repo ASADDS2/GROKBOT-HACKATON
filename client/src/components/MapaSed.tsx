@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import Map, { Marker, NavigationControl, Popup } from 'react-map-gl'
+import Map, { Marker, NavigationControl, Popup } from 'react-map-gl/maplibre'
 import type { BarrioSedProperties, SedFeatureCollection } from '../../../shared/types/api'
 import { visualDePaso, type PasoEscala } from '../lib/escalaVisual'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import 'maplibre-gl/dist/maplibre-gl.css'
 
 interface MapaSedProps {
   datosIniciales: SedFeatureCollection
@@ -20,7 +20,8 @@ interface PopupBarrio {
   via_abierta: boolean
 }
 
-const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN
+/** Estilo vectorial público (OpenFreeMap) — no requiere token. */
+const ESTILO_MAPA = 'https://tiles.openfreemap.org/styles/liberty'
 const CENTRO: [number, number] = [-77.025, 3.883]
 
 function boundsDe(datos: SedFeatureCollection): {
@@ -136,11 +137,24 @@ function MapaEsquematico({
 export function MapaSed({ datosIniciales }: MapaSedProps) {
   const [datos, setDatos] = useState<SedFeatureCollection>(datosIniciales)
   const [popup, setPopup] = useState<PopupBarrio | null>(null)
-  const [mapError, setMapError] = useState(!TOKEN)
+  const [mapError, setMapError] = useState(false)
 
   useEffect(() => {
     setDatos(datosIniciales)
   }, [datosIniciales])
+
+  const vistaInicial = useMemo(() => {
+    if (!datos.features.length) {
+      return { longitude: CENTRO[0], latitude: CENTRO[1], zoom: 12.2 }
+    }
+    const b = boundsDe(datos)
+    const longitude = (b.minLon + b.maxLon) / 2
+    const latitude = (b.minLat + b.maxLat) / 2
+    const span = Math.max(b.maxLon - b.minLon, b.maxLat - b.minLat)
+    // Buenaventura + Quibdó están lejos: zoom bajo para ver ambos municipios.
+    const zoom = span > 1 ? 7.2 : span > 0.15 ? 10.5 : 12.2
+    return { longitude, latitude, zoom }
+  }, [datos])
 
   function abrir(p: BarrioSedProperties, lon: number, lat: number) {
     setPopup({
@@ -184,18 +198,23 @@ export function MapaSed({ datosIniciales }: MapaSedProps) {
           </div>
         ) : null}
         <p className="pointer-events-none absolute right-2 top-2 bg-paper/90 px-2 py-1 text-[10px] uppercase tracking-widest">
-          Plano esquemático · sin token Mapbox
+          Plano esquemático · tiles no cargaron
         </p>
       </div>
     )
   }
 
+  // Remonta cuando llegan puntos reales: initialViewState solo aplica al montar.
+  const mapKey = datos.features.length
+    ? `${vistaInicial.longitude.toFixed(3)}-${vistaInicial.latitude.toFixed(3)}-${vistaInicial.zoom}`
+    : 'vacio'
+
   return (
     <div className="relative h-full min-h-[320px] w-full border border-line">
       <Map
-        mapboxAccessToken={TOKEN}
-        initialViewState={{ longitude: CENTRO[0], latitude: CENTRO[1], zoom: 12.2 }}
-        mapStyle="mapbox://styles/mapbox/light-v11"
+        key={mapKey}
+        initialViewState={vistaInicial}
+        mapStyle={ESTILO_MAPA}
         style={{ width: '100%', height: '100%' }}
         onError={() => setMapError(true)}
       >
