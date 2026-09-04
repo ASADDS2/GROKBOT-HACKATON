@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReporteDTO, SedFeatureCollection } from '../../../shared/types/api'
 import { BotonReplay } from '../components/BotonReplay'
 import { ChatReporte } from '../components/ChatReporte'
@@ -6,9 +6,11 @@ import { EscalaDeSed } from '../components/EscalaDeSed'
 import { MapaSed } from '../components/MapaSed'
 import { MarcadorAlerta } from '../components/MarcadorAlerta'
 import { PanelReportes } from '../components/PanelReportes'
-import { apiFetch } from '../lib/apiClient'
+import { ApiFetchError, apiFetch, mensajeErrorApi } from '../lib/apiClient'
 import { getFotogramasReplay, REPLAY_DURACION_MS } from '../lib/datosReplay'
 import { EMPTY_SED } from '../lib/escalaVisual'
+
+const POLL_MS = 12_000
 
 export function MapaPage() {
   const [datosVivo, setDatosVivo] = useState<SedFeatureCollection>(EMPTY_SED)
@@ -23,25 +25,36 @@ export function MapaPage() {
 
   useEffect(() => {
     let vivo = true
-    setCargando(true)
-    apiFetch<SedFeatureCollection>('/api/sed')
-      .then((fc) => {
+
+    async function cargarSed(primera: boolean) {
+      if (primera) setCargando(true)
+      try {
+        const fc = await apiFetch<SedFeatureCollection>('/api/sed')
         if (!vivo) return
         setDatosVivo(fc)
         setAvisoApi(null)
-      })
-      .catch(() => {
+      } catch (err) {
         if (!vivo) return
-        setDatosVivo(EMPTY_SED)
+        setDatosVivo((prev) => (prev.features.length ? prev : EMPTY_SED))
+        const stub = err instanceof ApiFetchError && err.status === 501
         setAvisoApi(
-          'GET /api/sed no respondió. Mapa vacío, replay y chat siguen activos (backend pendiente).',
+          stub
+            ? 'GET /api/sed: backend aún no implementa esta ruta. Mapa vacío; replay y chat siguen.'
+            : `GET /api/sed no respondió. ${mensajeErrorApi(err, 'Red caída')}. Replay y chat siguen.`,
         )
-      })
-      .finally(() => {
-        if (vivo) setCargando(false)
-      })
+      } finally {
+        if (vivo && primera) setCargando(false)
+      }
+    }
+
+    void cargarSed(true)
+    const poll = window.setInterval(() => {
+      void cargarSed(false)
+    }, POLL_MS)
+
     return () => {
       vivo = false
+      window.clearInterval(poll)
     }
   }, [])
 
@@ -70,14 +83,6 @@ export function MapaPage() {
     }
   }, [reproduciendo])
 
-  const onReportesChange = useCallback((lista: ReporteDTO[]) => {
-    setReportes((prev) => {
-      const ids = new Set(lista.map((r) => r.id))
-      const extra = prev.filter((r) => !ids.has(r.id))
-      return [...lista, ...extra]
-    })
-  }, [])
-
   function toggleReplay() {
     if (!replayOn) {
       setReplayOn(true)
@@ -101,8 +106,8 @@ export function MapaPage() {
       <header>
         <h1 className="font-display text-3xl text-well">Mapa de sed</h1>
         <p className="mt-1 max-w-xl text-sm text-ink/75">
-          Cada marca usa <strong>paso_escala</strong> del servidor: forma + color + textura. El
-          chat reemplaza Twilio. El replay corre sin red.
+          Cada marca usa <strong>paso_escala</strong> del servidor Express. Polling a{' '}
+          <code>GET /api/sed</code> cada 12 s. El replay corre sin red.
         </p>
         {cargando ? <p className="mt-2 text-sm">Cargando capa de sed…</p> : null}
         {avisoApi ? (
@@ -113,7 +118,7 @@ export function MapaPage() {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="flex min-h-[360px] flex-col gap-3">
           <div className="h-[52vh] min-h-[320px] lg:h-[560px]">
-            <MapaSed datosIniciales={datosMapa} onReportesChange={onReportesChange} />
+            <MapaSed datosIniciales={datosMapa} />
           </div>
           <EscalaDeSed />
           <BotonReplay

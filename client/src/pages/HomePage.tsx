@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom'
 export function HomePage() {
   return (
     <div className="mx-auto max-w-xl px-4 py-10">
-      <p className="text-[11px] uppercase tracking-[0.25em] text-well">La Guajira · GOTA</p>
+      <p className="text-[11px] uppercase tracking-[0.25em] text-well">
+        Buenaventura · Quibdó · GOTA
+      </p>
       <h1 className="mt-2 font-display text-5xl leading-[0.95] text-ink">
         El agua no es un rumor. Es un mapa.
       </h1>

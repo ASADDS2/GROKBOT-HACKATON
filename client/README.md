@@ -2,50 +2,50 @@
 
 SPA Vite + React 18 + TypeScript + Tailwind + react-router-dom.
 
-El compañero/a dueño de **`/server`** (Express) implementa los endpoints. Este paquete **no** crea rutas Express, no usa Next.js, no usa `@supabase/ssr` y no escribe tablas desde el navegador.
+Habla con **Express en `:3001`** (`VITE_API_BASE_URL`). Los datos viven en **Postgres** (`DATABASE_URL` del servidor). No hay Supabase ni Next.js.
 
 ## Arranque
 
-Desde la raíz del monorepo:
+Desde la raíz (levanta server + client):
 
 ```bash
 npm install
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
-O solo este workspace:
+Solo este workspace:
 
 ```bash
 cd client
+cp .env.example .env
 npm install
 npm run dev
 npm run build
 ```
 
-Abre `http://localhost:5173`. Mobile-first pensado a **375px**.
+Abre `http://localhost:5173`. Mobile-first a **375px**.
 
-## Variables (`/.env` a partir de `.env.example`)
+## Variables
 
 | Variable | Uso |
 | --- | --- |
-| `VITE_API_BASE_URL` | Base Express, default `http://localhost:3001` |
-| `VITE_MAPBOX_TOKEN` | Mapa GL. Si falta, plano esquemático |
-| `VITE_SUPABASE_URL` | `createClient` + Realtime `INSERT` en `reportes` |
-| `VITE_SUPABASE_ANON_KEY` | clave anónima (solo lectura en vivo) |
+| `VITE_API_BASE_URL` | Express, default `http://localhost:3001` |
+| `VITE_MAPBOX_TOKEN` | Mapbox GL. Si falta, plano esquemático |
 
-## Endpoints que espera la UI
+## Endpoints (contrato en `shared/types/api.ts`)
 
 | Método | Ruta | Tipo |
 | --- | --- | --- |
+| `GET` | `/api/salud` | `{ ok, servicio }` |
 | `GET` | `/api/sed` | `SedFeatureCollection` |
 | `GET` | `/api/alertas` | `AlertaDTO[]` |
 | `GET` | `/api/ruta` | `RutaResponse` |
 | `GET` | `/api/reportes/revision` | `ReporteDTO[]` |
-| `POST` | `/api/reportes` | `{ texto_crudo, canal, sesion_id }` → `ReporteDTO` |
+| `POST` | `/api/reportes` | `ReporteInput` → `ReporteDTO` |
 | `PATCH` | `/api/reportes/:id` | `{ barrio_id?, necesita_revision? }` |
-| `POST` | `/api/transcribir` | multipart campo `audio` → `{ texto }` |
+| `POST` | `/api/transcribir` | multipart `audio` → `TranscripcionResponse` |
 | `POST` | `/api/entregas` | `EntregaInput` |
 
-Si el API falla, el mapa usa un `FeatureCollection` vacío. **Replay 48 h / 30 s** es offline (`src/lib/datosReplay.ts`). El chat muestra error y no se cae.
-
-Tipos: import relativo a `../../../shared/types/api`. El cliente **nunca** recalcula la fórmula de sed: solo pinta `paso_escala`.
+B1–B2 aún pueden devolver **501**. La UI muestra «backend aún no implementa esta ruta», conserva el último `FeatureCollection` (o uno vacío) y el **replay 48 h / 30 s** sigue offline. Polling de sed cada 12 s.

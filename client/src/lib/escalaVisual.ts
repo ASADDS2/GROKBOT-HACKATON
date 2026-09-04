@@ -1,6 +1,7 @@
-import type { SedFeatureCollection, SeveridadAlerta } from '../../../shared/types/api'
+import type { AlertaDTO, SedFeatureCollection } from '../../../shared/types/api'
 
 export type PasoEscala = 0 | 1 | 2 | 3
+export type SeveridadAlerta = AlertaDTO['severidad']
 
 export interface VisualPaso {
   paso: PasoEscala

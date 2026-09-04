@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { EntregaInput, RutaResponse } from '../../../shared/types/api'
-import { apiFetch } from '../lib/apiClient'
+import { apiFetch, mensajeErrorApi } from '../lib/apiClient'
 import { nombreBarrio } from '../lib/datosReplay'
 
 interface ListaRutaProps {
@@ -32,12 +32,11 @@ export function ListaRuta({ ruta }: ListaRutaProps) {
     try {
       await apiFetch('/api/entregas', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
       setAviso(`Entrega en ${nombreBarrio(parada.barrio_id)} registrada.`)
-    } catch {
-      setAviso('No se pudo confirmar la entrega (backend pendiente).')
+    } catch (err) {
+      setAviso(mensajeErrorApi(err, 'No se pudo confirmar la entrega'))
     }
   }
 

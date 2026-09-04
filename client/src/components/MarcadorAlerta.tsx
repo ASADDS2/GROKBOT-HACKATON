@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { AlertaDTO } from '../../../shared/types/api'
-import { apiFetch } from '../lib/apiClient'
+import { apiFetch, mensajeErrorApi } from '../lib/apiClient'
 import { nombreBarrio } from '../lib/datosReplay'
 import { VISUAL_ALERTA } from '../lib/escalaVisual'
 
@@ -20,9 +20,9 @@ export function MarcadorAlerta({ barrioId }: MarcadorAlertaProps) {
         const lista = barrioId ? data.filter((a) => a.barrio_id === barrioId) : data
         setAlertas(lista)
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         if (!vivo) return
-        setError('Alertas no disponibles (backend apagado).')
+        setError(mensajeErrorApi(err, 'Alertas no disponibles'))
         setAlertas([])
       })
     return () => {

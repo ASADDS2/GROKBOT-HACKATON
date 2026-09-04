@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { ReporteDTO, RevisarReporteInput } from '../../../shared/types/api'
-import { apiFetch } from '../lib/apiClient'
+import type { ReporteDTO } from '../../../shared/types/api'
+import { apiFetch, mensajeErrorApi } from '../lib/apiClient'
 import { CATALOGO_BARRIOS, nombreBarrio } from '../lib/datosReplay'
 
 interface BandejaRevisionProps {
@@ -12,18 +12,17 @@ export function BandejaRevision({ reportes, onCambio }: BandejaRevisionProps) {
   const [aviso, setAviso] = useState<string | null>(null)
   const [ocupado, setOcupado] = useState<string | null>(null)
 
-  async function parchear(id: string, body: RevisarReporteInput) {
+  async function parchear(id: string, body: { barrio_id?: string | null; necesita_revision?: boolean }) {
     setOcupado(id)
     setAviso(null)
     try {
       await apiFetch<ReporteDTO>(`/api/reportes/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
       onCambio(id)
-    } catch {
-      setAviso('PATCH falló: el servidor de revisión aún no está. No se escribe en Supabase desde aquí.')
+    } catch (err) {
+      setAviso(mensajeErrorApi(err, 'PATCH /api/reportes/:id falló'))
     } finally {
       setOcupado(null)
     }

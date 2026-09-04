@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ReporteDTO, RutaResponse } from '../../../shared/types/api'
 import { BandejaRevision } from '../components/BandejaRevision'
 import { ListaRuta } from '../components/ListaRuta'
-import { apiFetch } from '../lib/apiClient'
+import { ApiFetchError, apiFetch, mensajeErrorApi } from '../lib/apiClient'
 
 export function OperadorPage() {
   const [ruta, setRuta] = useState<RutaResponse | null>(null)
@@ -24,8 +24,19 @@ export function OperadorPage() {
       if (rRev.status === 'fulfilled') setRevision(rRev.value)
       else fallos.push('revisión')
       if (fallos.length) {
+        const stub =
+          (rRuta.status === 'rejected' && rRuta.reason instanceof ApiFetchError && rRuta.reason.status === 501) ||
+          (rRev.status === 'rejected' && rRev.reason instanceof ApiFetchError && rRev.reason.status === 501)
         setAviso(
-          `Backend no respondió (${fallos.join(' y ')}). Mesa lista; los datos llegan cuando Express exista.`,
+          stub
+            ? `GET ${fallos.join(' / ')}: backend aún no implementa esta ruta.`
+            : `No se pudo cargar ${fallos.join(' y ')}. ${
+                rRuta.status === 'rejected'
+                  ? mensajeErrorApi(rRuta.reason, '')
+                  : rRev.status === 'rejected'
+                    ? mensajeErrorApi(rRev.reason, '')
+                    : ''
+              }`.trim(),
         )
       }
       setCargando(false)
@@ -41,7 +52,7 @@ export function OperadorPage() {
         <h1 className="font-display text-3xl text-well">Mesa de operación</h1>
         <p className="mt-1 text-sm text-ink/75">
           Ruta numerada (sirve impresa, no solo en color) y bandeja de reportes dudosos. Esta
-          página no escribe en Supabase: solo <code>apiFetch</code>.
+          página no escribe en Postgres: solo <code>apiFetch</code> hacia Express.
         </p>
         {cargando ? <p className="mt-2 text-sm">Cargando ruta y revisión…</p> : null}
         {aviso ? (

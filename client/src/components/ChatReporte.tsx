@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import type { CrearReporteInput, ReporteDTO, TranscribirResponse } from '../../../shared/types/api'
-import { apiFetch } from '../lib/apiClient'
+import type { ReporteDTO, ReporteInput, TranscripcionResponse } from '../../../shared/types/api'
+import { apiFetch, mensajeErrorApi } from '../lib/apiClient'
 import { getSesionId } from '../lib/sesion'
 
 interface ChatReporteProps {
@@ -36,7 +36,7 @@ export function ChatReporte({ onEnviado }: ChatReporteProps) {
   }, [])
 
   async function enviar(canal: 'web' | 'voz', crudo: string) {
-    const body: CrearReporteInput = {
+    const body: ReporteInput = {
       texto_crudo: crudo.trim(),
       canal,
       sesion_id: getSesionId(),
@@ -46,7 +46,6 @@ export function ChatReporte({ onEnviado }: ChatReporteProps) {
     try {
       const creado = await apiFetch<ReporteDTO>('/api/reportes', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
       onEnviado?.(creado)
@@ -54,9 +53,9 @@ export function ChatReporte({ onEnviado }: ChatReporteProps) {
       setTextoVoz('')
       setFaseVoz('idle')
       setAviso('Reporte enviado. Sin nombre ni teléfono: solo sesion_id.')
-    } catch {
+    } catch (err) {
       setAviso(
-        'No se pudo enviar. El backend Express aún no está listo. Tu texto se quedó en pantalla.',
+        `${mensajeErrorApi(err, 'No se pudo enviar')}. Tu texto se quedó en pantalla.`,
       )
     } finally {
       setEnviando(false)
@@ -103,14 +102,16 @@ export function ChatReporte({ onEnviado }: ChatReporteProps) {
     const fd = new FormData()
     fd.append('audio', blob, 'nota.webm')
     try {
-      const res = await apiFetch<TranscribirResponse>('/api/transcribir', {
+      const res = await apiFetch<TranscripcionResponse>('/api/transcribir', {
         method: 'POST',
         body: fd,
       })
       setTextoVoz(res.texto)
       setFaseVoz('confirmar')
-    } catch {
-      setAviso('No pudimos transcribir (backend apagado). Escribe el reporte a mano.')
+    } catch (err) {
+      setAviso(
+        `${mensajeErrorApi(err, 'No pudimos transcribir')}. Escribe el reporte a mano.`,
+      )
       setFaseVoz('idle')
     }
   }
@@ -133,7 +134,7 @@ export function ChatReporte({ onEnviado }: ChatReporteProps) {
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           rows={3}
-          placeholder="Ej. En Villa Fátima llevamos 5 días sin agua, hay niños con diarrea."
+          placeholder="Ej. En Lleras llevamos 5 días sin agua, hay niños con diarrea."
           className="min-h-20 w-full resize-y border border-line bg-paper-2/40 p-3 text-base outline-none focus:ring-2 focus:ring-well"
         />
         <div className="flex flex-wrap gap-2">
