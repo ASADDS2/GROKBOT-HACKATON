@@ -8,6 +8,7 @@
     "start": "tsx src/index.ts",
     "migrate": "tsx scripts/migrate.ts",
     "seed": "tsx scripts/seed.ts",
+    "test:extraccion": "tsx scripts/test-extraccion.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
