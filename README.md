@@ -44,4 +44,4 @@ npm run build                         # typecheck + Vite
 
 Backlog (fuera de esta sesión): `POST /api/transcribir` (B5 voz) y `POST /api/cron/x-search` (B6).
 
-Variables en `server/.env` (ver `server/.env.example`): `XAI_API_KEY`, `XAI_MODEL`, `DATABASE_URL`, `PORT`.
+Variables en `server/.env` (ver `server/.env.example`): `XAI_API_KEY`, `XAI_MODEL`, `DATABASE_URL`, `PORT`, `CORS_ORIGIN` (en Render: URL del frontend en Vercel).
